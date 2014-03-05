@@ -9,18 +9,21 @@ def time_stamp(string):
     return strftime(str_time, localtime(string))
 
 # Prints on screen for BSides Vancouver
-def screen_out(string):
+def screen_out(string, output=True):
     data = []
     data.append('SSID: %s' % string['ssid'])
     data.append('BSSID: %s' % string['bssid'])
     if string['type'] == 'client':
         data.append('(%s)' % string['device'])
-    out = '[%s] %s' % (time_stamp(string['time']), ' '.join(data))
+    if output:
+        out = '[%s] %s' % (time_stamp(string['time']), ' '.join(data))
+    else:
+        out = data
     return out
 
 def printer_out(string):
     p = printer.send_print(spacing=5)
-    p.write_out("test")
+    p.write_out(screen_out(string, output=False))
 
 t = tracker.tracking()
 w = wireless.probe_traffic()
@@ -35,4 +38,5 @@ while True:
         if t.insertable() and state:
             t.insert()
             print screen_out(item)
+            printer_out(item)
     sleep(3)
