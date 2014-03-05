@@ -8,7 +8,7 @@ class tracking():
         s.dbfile = 'storage.db'
         create_db = s._db_exist()
         s.con = sqlite3.connect(s.dbfile)
-        s.time_check = 10 # Minutes between seeing the same device show up again
+        s.time_check = 5 # Minutes between seeing the same device show up again
         if create_db != True:
             s._db_create()
 
@@ -33,14 +33,19 @@ class tracking():
 
     def insert(s):
         q = 'INSERT INTO tracking (type, bssid, device, ssid, datetime) VALUES (?, ?, ?, ?, ?)'
-        wtype, bssid, device, ssid, datetime = s.data['type'], s.data['bssid'], s.data['device'], s.data['ssid'], s.data['time']
-        s._db_execute(query=q, strings=(wtype, bssid, device, ssid, datetime))
+        s._db_execute(query=q, strings=(s.data['type'], s.data['bssid'], s.data['device'], s.data['ssid'], s.data['time']))
 
-    # Returns t/f based on whether or not it has been recent since the AP was found
-    def insert_recent(s):
-        output = False
+    # Returns t/f based on whether or not it has been recent since the device was found
+    def insertable(s):
+        output = True
         q = 'SELECT * FROM tracking WHERE bssid = ? ORDER BY datetime DESC LIMIT 1'
         item = s._db_execute(query=q, strings=(s.data['bssid'],), return_data=True)
         if len(item) > 0:
-            output = (time() - int(item[0][4])) > s.time_check
+            output = (time() - int(item[0][4])) < s.time_check
         return output
+
+    # Really meant for checking for APs
+    def new(s):
+        q = 'SELECT * FROM tracking WHERE bssid = ? AND ssid = ? LIMIT 1'
+        item = s._db_execute(query=q, strings=(s.data['bssid'], s.data['ssid']), return_data=True)
+        return len(item) == 0

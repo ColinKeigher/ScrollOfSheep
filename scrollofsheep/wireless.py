@@ -7,9 +7,9 @@ class probe_traffic():
     def __init__(s, iface='mon0'):
         s.iface = iface
         s.packet_count = 100
-        s.data = []
 
     def _sniff(s):
+        s.data = [] # Clear the data since we track it in a db anyway
         sniff(iface=s.iface, count=s.packet_count, prn=s._sniff_packet)
 
     def _sniff_packet(s, packet):
@@ -53,6 +53,8 @@ class device_manufacturer():
             'lg': [ '40:b0:fa', 'c4:43:8f' ],
             'intel': [ '00:24:d7', '10:0b:a9' ],
             'nintendo': [ '00:21:47' ],
+            'sony': [ '8c:7c:b5' ],
+            'generic': [ 'c0:f8:da' ], # For things made by FoxConn et al
         }
         for key in ouis.keys():
             if s.mac_addr in ouis[key]:
@@ -64,9 +66,11 @@ class device_manufacturer():
         output = name
         names = { 
             'apple': 'Apple iOS device',
+            'generic': 'Generic mobile device',
             'lg': 'LG Electronics phone',
             'intel': 'Intel-based laptop',
             'nintendo': 'Nintendo gaming device',
+            'sony': 'Sony gaming device',
             'unknown': 'Unidentified manufacturer',
             }
         if name in names.keys():

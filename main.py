@@ -29,7 +29,10 @@ while True:
     data = w.scan()
     for item in data:
         t.data = item
-        if t.insert_recent():
+        state = True
+        if item['type'] == 'ap':
+            state = t.new() # APs tend to clutter up things
+        if t.insertable() and state:
             t.insert()
             print screen_out(item)
     sleep(3)
