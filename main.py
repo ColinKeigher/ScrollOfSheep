@@ -3,6 +3,8 @@
 from scrollofsheep import printer, wireless, tracker
 from time import sleep, strftime, localtime
 
+print_out = False
+
 # Makes a friendly date time
 def time_stamp(string):
     str_time = '%H:%M:%S'
@@ -16,7 +18,8 @@ def screen_out(string, output=True):
     if string['type'] == 'client':
         data.append('(%s)' % string['device'])
     if output:
-        out = '[%s] %s' % (time_stamp(string['time']), ' '.join(data))
+        stamp = '[%s]' % time_stamp(string['time'])
+        out = '%s %s' % (stamp, ' :: '.join(data))
     else:
         out = data
     return out
@@ -25,18 +28,23 @@ def printer_out(string):
     p = printer.send_print(spacing=5)
     p.write_out(screen_out(string, output=False))
 
-t = tracker.tracking()
-w = wireless.probe_traffic()
-w.packet_count = 1000
-while True:
-    data = w.scan()
-    for item in data:
-        t.data = item
-        state = True
-        if item['type'] == 'ap':
-            state = t.new() # APs tend to clutter up things
-        if t.insertable() and state:
-            t.insert()
-            print screen_out(item)
-            printer_out(item)
-    sleep(3)
+def main():
+    t = tracker.tracking()
+    w = wireless.probe_traffic()
+    w.packet_count = 1000
+    while True:
+        data = w.scan()
+        for item in data:
+            t.data = item
+            state = True
+            if item['type'] == 'ap':
+                state = t.new() # APs tend to clutter up things
+            if t.insertable() and state:
+                t.insert()
+                print screen_out(item)
+                if print_out:
+                    printer_out(item)
+        sleep(3)
+
+if __name__ == '__main__':
+    main()
