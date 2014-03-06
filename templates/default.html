@@ -1,7 +1,62 @@
 <html>
+<head>
+    <meta http-equiv="refresh" content="10" >
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script>
+        function timeConverter(UNIX_timestamp){
+            var a = new Date(UNIX_timestamp*1000);
+            var hour = a.getUTCHours();
+            var min = a.getUTCMinutes();
+            var sec = a.getUTCSeconds();
+            var time = hour+':'+min+':'+sec ;
+            return time;
+         }
+    </script>
+</head>
 <body>
 
 <h1>Scroll of Sheep</h1>
+
+{% for device_type, data in device_data.iteritems() %}
+<table id="objects">
+    <tr>
+        <th colspan="6">
+            {% if device_type == 'bt' %}
+            Bluetooth Devices
+            {% elif device_type == 'ap' %}
+            Wi-Fi Access Points
+            {% elif device_type == 'client' %}
+            Wi-Fi Client Devices
+            {% endif %}
+        </th>
+    <tr>
+        <th>Time</th>
+        <th>MAC</th>
+        {% if device_type != 'bt' %}
+        <th>SSID</th>
+        {% endif %}
+        {% if device_type == 'bt' or device_type == 'client' %}
+        <th>Device Type</th>
+        {% endif %}
+    </tr>
+
+    {% for item in data %}
+    {% if item != 0 %}
+    <tr>
+        <td>{{ item.realtime }}</td>
+        <td class="bssid">{{ item.bssid }}</td>
+        {% if item.type != 'bt' %}
+        <td>{{ item.ssid }}</td>
+        {% endif %}
+        {% if device_type == 'bt' or device_type == 'client' %}
+        <td>{{ item.device }}</td>
+        {% endif %}
+    </tr>
+    {% endif %}
+    {% endfor %}
+
+</table>
+{% endfor %}
 
 </body>
 </html>

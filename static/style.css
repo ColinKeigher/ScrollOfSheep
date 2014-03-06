@@ -1,0 +1,16 @@
+body {
+    font-family: "Trebuchet MS", Helvetica, sans-serif;
+}
+tr {
+    padding: 1px;
+    border-spacing: 1px;
+}
+td {
+    font-size: 10pt;
+    vertical-align: top;
+}
+
+#objects .bssid {
+    font-family: "Lucida Console", Monaco, monospace;
+    font-variant: fixed;
+}

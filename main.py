@@ -24,6 +24,11 @@ def screen_out(string, output=True):
         out = data
     return out
 
+# Combines data and then limits to a specific value of items
+def append_data(orig_data, items):
+    data = orig_data + items
+    return data[:10]
+
 def printer_out(string):
     p = printer.send_print(spacing=5)
     p.write_out(screen_out(string, output=False))
@@ -33,7 +38,10 @@ def main():
     w = wireless.probe_traffic()
     w.packet_count = 1000
     while True:
+        # Output some details about what is being found
         data = w.scan()
+        stats = t.stats()
+        process = [] # Used to storing for use in the web interface
         for item in data:
             t.data = item
             state = True
@@ -41,10 +49,26 @@ def main():
                 state = t.new() # APs tend to clutter up things
             if t.insertable() and state:
                 t.insert()
+                process.append(item)
                 print screen_out(item)
                 if print_out:
                     printer_out(item)
-        #print t.stats()
+        # Processing for storage used by the web service
+        # I'll clean this up later--Pickle drove me nuts here.
+        wt = tracker.web_track()
+        build = None
+        if build == None: # We'll build a new set of keys
+            build = {}
+            for x in t.stats_types:
+                build[x] = [ 0 ] # Goddamn Pickle's fault for this
+        for key in stats.keys():
+            for item in stats[key]:
+                ckey = item['type']
+                item['realtime'] = time_stamp(item['time'])
+                build[ckey].append(item)
+        for key in build.keys(): # Limit each to 10 or something
+            build[key] = build[key][:10]
+        wt.overwrite(build)
         sleep(3)
 
 if __name__ == '__main__':

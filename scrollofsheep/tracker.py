@@ -43,7 +43,7 @@ class tracking():
         return output
 
     def _stats_build(s, dev_type):
-        q = 'SELECT * FROM tracking WHERE type = ? ORDER BY datetime DESC LIMIT 25'
+        q = 'SELECT * FROM tracking WHERE type = ? ORDER BY datetime DESC LIMIT 10'
         items = s._db_execute(query=q, strings=(dev_type, ), return_data=True)
         return s._stats_clean(items)
 
@@ -97,7 +97,7 @@ class web_track():
         s.items = pickle.load(open(s.data_file, 'rb'))
 
     def _save(s):
-        pickle.save(open(s.data_file, 'wb'), s.items)
+        pickle.dump(s.items, open(s.data_file, 'wb'))
 
     def _pickle_exist(s):
         return os.path.isfile(s.data_file)
@@ -109,7 +109,10 @@ class web_track():
     def _update_last(s):
         return s.items['last_update']
 
-    def items(s):
+    #def _update_stats(s):
+    #    for 
+
+    def item_data(s):
         if 'data' in s.items.keys():
             return s.items['data']
         else:
@@ -120,7 +123,12 @@ class web_track():
         s._update_now()
 
     def clear(s):
-        s.items['data'] = []
+        s.items['data'] = {}
+        s._update_now()
+
+    def overwrite(s, data):
+        s.items['data'] = {}
+        s.items['data'] = data
         s._update_now()
 
     def last(s):
