@@ -12,6 +12,13 @@ class probe_traffic():
     def _sniff(s):
         s.data = [] # Clear the data since we track it in a db anyway
         sniff(iface=s.iface, count=s.packet_count, prn=s._sniff_packet)
+        s._sniff_bt()
+
+    # Probes Bluetooth
+    def _sniff_bt(s):
+        bt = probe_bt()
+        for x in bt.output():
+            s.data.append(x)
 
     def _sniff_packet(s, packet):
         output = { 'time': time() }
@@ -47,11 +54,18 @@ class probe_bt():
 
     def _output(s, item):
         dm = device_manufacturer(item)
-        output = { 'time': time(), 'type': 'bt', 'ssid': '(Bluetooth)' }
+        output = { 'time': time(), 'type': 'bt', 'ssid': '(Bluetooth)', 'bssid': item, 'device': dm.output() }
+        return output
+
+    def output(s):
+        output = []
+        for item in s.nearby:
+            output.append(s._output(item.lower()))
+        return output
 
 class device_manufacturer():
     def __init__(s, mac_addr):
-        s.mac_addr = mac_addr
+        s.mac_addr = mac_addr.lower() # For whatever reason this makes sense
         s.dev_manu = None
         s._cut_mac()
         s._mac_id()
@@ -65,15 +79,17 @@ class device_manufacturer():
             'alfa': [ '00:c0:ca' ],
             'apple': [ '7c:d1:c3', '00:26:08', '00:22:41', '34:c0:59', '0c:77:1a', '14:8f:c6',
                         '7c:fa:df', '50:ea:d6', 'f0:dc:e2', 'e4:25:e7', '14:5a:05', '40:b3:95',
-                        '58:b0:35', '18:20:32' ],
+                        '58:b0:35', '18:20:32', 'a8:96:8a', '70:11:24', '2c:b4:3a', '04:e5:36',
+                         ],
             'asus': [ '08:60:6e' ],
             'canon': [ '18:0c:ac' ],
-            'liteon': [ '74:e5:43' ],
+            'liteon': [ '74:e5:43', '74:de:2b' ],
             'lg': [ '40:b0:fa', 'c4:43:8f', 'a8:16:b2', '10:68:3f' ],
             'intel': [ '00:24:d7', '10:0b:a9', '8c:a9:82' ],
             'nintendo': [ '00:21:47', '00:21:bd' ],
-            'sony': [ '8c:7c:b5', 'a8:e3:ee' ],
-            'samsung': [ '50:b7:c3', '90:18:7c', '5c:0a:5b', 'b8:5e:7b', '88:32:9b', '20:13:e0' ],
+            'sony': [ '8c:7c:b5', 'a8:e3:ee', '28:0d:fc' ],
+            'samsung': [ '50:b7:c3', '90:18:7c', '5c:0a:5b', 'b8:5e:7b', '88:32:9b', '20:13:e0',
+                            '34:23:ba', '48:44:f7', '78:f7:be', 'b8:c6:8e' ],
             'generic': [ 'c0:f8:da', '94:39:e5', '00:23:4e', '00:26:ab',
                             '60:21:c0', '00:08:ca', '00:03:2a', '00:23:4d',
                             '00:1a:73', '5c:f8:a1' ], # For things made by FoxConn et al

@@ -1,5 +1,8 @@
+# -*- coding: utf-8 -*-
+
 import os
 import sqlite3
+import pickle
 from time import time
 
 # Uses this to track everything
@@ -8,6 +11,8 @@ class tracking():
         s.dbfile = 'storage.db'
         create_db = s._db_exist()
         s.con = sqlite3.connect(s.dbfile)
+        s.stats_types = [ 'ap', 'client', 'bt' ]
+        s.stats_keys = [ 'type', 'bssid', 'device', 'ssid', 'time' ]
         s.time_check = 5 # Minutes between seeing the same device show up again
         if create_db != True:
             s._db_create()
@@ -31,6 +36,27 @@ class tracking():
     def _db_exist(s):
         return os.path.isfile(s.dbfile)
 
+    def _stats(s):
+        output = {}
+        for data_type in s.stats_types:
+            output[data_type] = s._stats_build(data_type)
+        return output
+
+    def _stats_build(s, dev_type):
+        q = 'SELECT * FROM tracking WHERE type = ? ORDER BY datetime DESC LIMIT 25'
+        items = s._db_execute(query=q, strings=(dev_type, ), return_data=True)
+        return s._stats_clean(items)
+
+    def _stats_clean(s, items):
+        return [ s._stats_clean_item(x) for x in items if len(items) != 0 ]
+
+    def _stats_clean_item(s, item):
+        data = {}
+        for x in xrange(0, len(s.stats_keys)):
+            current = s.stats_keys[x]
+            data[current] = item[x]
+        return data
+
     def insert(s):
         q = 'INSERT INTO tracking (type, bssid, device, ssid, datetime) VALUES (?, ?, ?, ?, ?)'
         s._db_execute(query=q, strings=(s.data['type'], s.data['bssid'], s.data['device'], s.data['ssid'], s.data['time']))
@@ -49,3 +75,53 @@ class tracking():
         q = 'SELECT * FROM tracking WHERE bssid = ? AND ssid = ? LIMIT 1'
         item = s._db_execute(query=q, strings=(s.data['bssid'], s.data['ssid']), return_data=True)
         return len(item) == 0
+
+    # Building stats for the web interface
+    def stats(s):
+        return s._stats()
+
+# Keep track of things for the web interface
+class web_track():
+    def __init__(s, data=None):
+        s.data = data
+        s.data_file = 'webtrack.dat'
+        s._init()
+
+    def _init(s):
+        if s._pickle_exist():
+            s._load()
+        else:
+            s.items = {}
+
+    def _load(s):
+        s.items = pickle.load(open(s.data_file, 'rb'))
+
+    def _save(s):
+        pickle.save(open(s.data_file, 'wb'), s.items)
+
+    def _pickle_exist(s):
+        return os.path.isfile(s.data_file)
+
+    def _update_now(s):
+        s.items['last_update'] = time()
+        s._save()
+
+    def _update_last(s):
+        return s.items['last_update']
+
+    def items(s):
+        if 'data' in s.items.keys():
+            return s.items['data']
+        else:
+            return None
+
+    def insert(s):
+        s.items['data'] = s.data
+        s._update_now()
+
+    def clear(s):
+        s.items['data'] = []
+        s._update_now()
+
+    def last(s):
+        return s._update_last()
