@@ -2,30 +2,24 @@
 <head>
     <meta http-equiv="refresh" content="10" >
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <script>
-        function timeConverter(UNIX_timestamp){
-            var a = new Date(UNIX_timestamp*1000);
-            var hour = a.getUTCHours();
-            var min = a.getUTCMinutes();
-            var sec = a.getUTCSeconds();
-            var time = hour+':'+min+':'+sec ;
-            return time;
-         }
-    </script>
 </head>
 <body>
 
 <h1>Scroll of Sheep</h1>
 
+<div id="objects">
 {% for device_type, data in device_data.iteritems() %}
-<table id="objects">
+<table>
     <tr>
         <th colspan="6">
             {% if device_type == 'bt' %}
+            <img src="{{ url_for('static', filename='bt.png') }}" height="32" width="32" /><br />
             Bluetooth Devices
             {% elif device_type == 'ap' %}
+            <img src="{{ url_for('static', filename='wifi_ap.png') }}" height="32" width="32" /><br />
             Wi-Fi Access Points
             {% elif device_type == 'client' %}
+            <img src="{{ url_for('static', filename='device.png') }}" height="32" width="32" /><br />
             Wi-Fi Client Devices
             {% endif %}
         </th>
@@ -57,6 +51,7 @@
 
 </table>
 {% endfor %}
+</div>
 
 </body>
 </html>

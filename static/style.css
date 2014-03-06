@@ -10,6 +10,16 @@ td {
     vertical-align: top;
 }
 
+#objects {
+   -moz-column-count: 2;
+   -moz-column-gap: 20px;
+   -webkit-column-count: 2;
+   -webkit-column-gap: 20px;
+}
+#objects table {
+    width: 100%;
+}
+
 #objects .bssid {
     font-family: "Lucida Console", Monaco, monospace;
     font-variant: fixed;
