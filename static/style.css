@@ -5,6 +5,9 @@ tr {
     padding: 1px;
     border-spacing: 1px;
 }
+th {
+    text-align: left;
+}
 td {
     font-size: 10pt;
     vertical-align: top;
@@ -18,6 +21,9 @@ td {
 }
 #objects table {
     width: 100%;
+}
+#objects .head {
+    text-align: center;
 }
 
 #objects .bssid {

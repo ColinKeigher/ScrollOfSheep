@@ -11,7 +11,7 @@
 {% for device_type, data in device_data.iteritems() %}
 <table>
     <tr>
-        <th colspan="6">
+        <th colspan="6" class="head">
             {% if device_type == 'bt' %}
             <img src="{{ url_for('static', filename='bt.png') }}" height="32" width="32" /><br />
             Bluetooth Devices
